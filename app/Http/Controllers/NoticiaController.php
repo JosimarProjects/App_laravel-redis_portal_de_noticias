@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+use Barryvdh\Debugbar\Facade as Debugbar;
 
 use App\Models\Noticia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class NoticiaController extends Controller
 {
@@ -15,7 +17,29 @@ class NoticiaController extends Controller
     public function index()
     {
         //
-        $noticias = Noticia::orderBy('created_at')->limit(10)->get();
+
+       // $noticias = Noticia::orderBy('created_at')->limit(10)->get();
+        //criar um dado dentro do bd Redis
+        //Cache::put('site', 'Josimar@030191.com',10);
+        //chave valor tempo em segundos
+
+        //recuperar um dado do Redis
+        //$site = Cache::get('site');
+
+        $noticias = [];
+
+     /*   if(Cache::has('dez_primeiras_noticias')){
+            $noticias = Cache::get('dez_primeiras_noticias');
+        }else{
+            $noticias = Noticia::orderBy('created_at')->limit(10)->get();
+            Cache::put('dez_primeiras_noticias', $noticias, 15);
+        }*/
+
+
+        $noticias = Cache::remember('dez_primeiras_noticias', 15, function(){
+            return Noticia::orderBy('created_at')->limit(10)->get();
+        });
+
         return view('noticia', ['noticias' => $noticias]);
 
     }
